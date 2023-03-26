@@ -9,7 +9,8 @@ defmodule ExChat.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
       aliases: aliases(),
-      deps: deps()
+      deps: deps(),
+      releases: releases()
     ]
   end
 
@@ -19,7 +20,7 @@ defmodule ExChat.MixProject do
   def application do
     [
       mod: {ExChat.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :sasl, :ssl, :runtime_tools, :os_mon, :crypto]
     ]
   end
 
@@ -32,6 +33,7 @@ defmodule ExChat.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
+      {:bcrypt_elixir, "~> 3.0"},
       {:phoenix, "~> 1.7.2"},
       {:phoenix_ecto, "~> 4.4"},
       {:ecto_sql, "~> 3.6"},
@@ -49,7 +51,12 @@ defmodule ExChat.MixProject do
       {:telemetry_poller, "~> 1.0"},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.5"}
+      {:plug_cowboy, "~> 2.5"},
+      # custom deps
+      {:uuid, "~> 1.1"},
+      {:memoize, "~> 1.4"},
+      {:shorter_maps, git: "https://github.com/boyzwj/shorter_maps.git", tag: "master"},
+      {:logger_file_backend, "~> 0.0.13"}
     ]
   end
 
@@ -68,6 +75,15 @@ defmodule ExChat.MixProject do
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
       "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+    ]
+  end
+
+  defp releases() do
+    [
+      exChat: [
+        include_erts: false,
+        include_executables_for: [:unix]
+      ]
     ]
   end
 end
