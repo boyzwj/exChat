@@ -1,0 +1,6 @@
+{
+    "emmet.preferences": {},
+    "emmet.includeLanguages": {
+        "phoenix-heex": "html"
+    }
+}

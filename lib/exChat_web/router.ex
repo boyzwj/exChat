@@ -17,12 +17,6 @@ defmodule ExChatWeb.Router do
     plug :accepts, ["json"]
   end
 
-  scope "/", ExChatWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
   # Other scopes may use custom stacks.
   # scope "/api", ExChatWeb do
   #   pipe_through :api
@@ -68,7 +62,7 @@ defmodule ExChatWeb.Router do
       on_mount: [{ExChatWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
-
+      live "/", ChatLive.Index, :index
       live "/chat", ChatLive.Index, :index
       live "/chat/new", ChatLive.Index, :new
       live "/chat/:id/edit", ChatLive.Index, :edit
