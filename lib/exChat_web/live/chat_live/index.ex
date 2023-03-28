@@ -6,7 +6,18 @@ defmodule ExChatWeb.ChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :chat_collection, Accounts.list_chat())}
+    IO.inspect(socket.assigns.current_user, label: "user")
+
+    socket =
+      socket
+      |> assign(
+        topics: [],
+        input_text: "",
+        current_topic: "",
+        messages: []
+      )
+
+    {:ok, socket}
   end
 
   @impl true

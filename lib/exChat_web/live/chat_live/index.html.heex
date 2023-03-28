@@ -1,41 +1,35 @@
-<.header>
-  Listing Chat
-  <:actions>
-    <.link patch={~p"/chat/new"}>
-      <.button>New Chat</.button>
-    </.link>
-  </:actions>
-</.header>
+<div class="container">
+  <h1>ChatGPT GUI</h1>
 
-<.table
-  id="chat"
-  rows={@streams.chat_collection}
-  row_click={fn {_id, chat} -> JS.navigate(~p"/chat/#{chat}") end}
->
-  <:col :let={{_id, chat}} label="Name"><%= chat.name %></:col>
-  <:action :let={{_id, chat}}>
-    <div class="sr-only">
-      <.link navigate={~p"/chat/#{chat}"}>Show</.link>
-    </div>
-    <.link patch={~p"/chat/#{chat}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, chat}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: chat.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
-    </.link>
-  </:action>
-</.table>
+  <div id="topic-select">
+    <select id="topic-dropdown" name="topic" phx-change="change_topic">
+      <%= for topic <- @topics do %>
+        <option value={topic} selected={if @current_topic==topic ,do: 'true' }>
+          <%= topic %>
+        </option>
+        <% end %>
+    </select>
+  </div>
 
-<.modal :if={@live_action in [:new, :edit]} id="chat-modal" show on_cancel={JS.patch(~p"/chat")}>
-  <.live_component
-    module={ExChatWeb.ChatLive.FormComponent}
-    id={@chat.id || :new}
-    title={@page_title}
-    action={@live_action}
-    chat={@chat}
-    patch={~p"/chat"}
-  />
-</.modal>
+  <div id="chat-messages" style="width: auto;height: auto">
+    <%= for message <- @messages do %>
+      <div class="message">
+        <span class="user">
+          <%= message.user %>:
+        </span>
+        <span class="content">
+          <%= message.content %>
+        </span>
+      </div>
+      <% end %>
+  </div>
+
+  <div id="chat-input">
+    <form phx-submit="send_message">
+      <input id="message-input" style="width: 600px;" type="text" name="message" placeholder="Enter your message..."
+        value={@input_text}>
+      <.button type="submit">Send</.button>
+
+    </form>
+  </div>
+</div>
