@@ -3,6 +3,8 @@ defmodule ExChatWeb.ChatLive.Index do
 
   alias ExChat.Accounts
   alias ExChat.Accounts.Chat
+  alias ExChat.Accounts.Message
+  use Common
 
   @impl true
   def mount(_params, _session, socket) do
@@ -14,8 +16,9 @@ defmodule ExChatWeb.ChatLive.Index do
         topics: [],
         input_text: "",
         current_topic: "",
-        messages: []
+        cur_msg_index: 0
       )
+      |> stream(:messages, [], dom_id: &"message-#{&1.index}")
 
     {:ok, socket}
   end
@@ -54,5 +57,23 @@ defmodule ExChatWeb.ChatLive.Index do
     {:ok, _} = Accounts.delete_chat(chat)
 
     {:noreply, stream_delete(socket, :chat_collection, chat)}
+  end
+
+  def handle_event("send_message", ~m{content}, socket) do
+    with content when content != "" <- String.trim(content) do
+      role = "user"
+      index = socket.assigns.cur_msg_index + 1
+      message = ~M{%Message content,role,index}
+      IO.inspect(message)
+
+      socket =
+        stream_insert(socket, :messages, message)
+        |> assign(:cur_msg_index, index)
+
+      {:noreply, socket}
+    else
+      _ ->
+        {:noreply, socket}
+    end
   end
 end

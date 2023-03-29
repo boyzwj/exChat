@@ -1,6 +1,8 @@
 <div class="container">
-  <h1>ChatGPT GUI</h1>
 
+  <.header>
+    ChatGPT
+  </.header>
   <div id="topic-select">
     <select id="topic-dropdown" name="topic" phx-change="change_topic">
       <%= for topic <- @topics do %>
@@ -11,25 +13,25 @@
     </select>
   </div>
 
-  <div id="chat-messages" style="width: auto;height: auto">
-    <%= for message <- @messages do %>
-      <div class="message">
-        <span class="user">
-          <%= message.user %>:
+  <div id="chat-messages" phx-update="stream" class="overscroll-auto hover:overscroll-contain  w-full">
+    <%= for {dom_id,message} <- @streams.messages do %>
+      <div class="message flex items-center" id={dom_id}>
+        <span class="role">
+          <%= message.role %>:
         </span>
-        <span class="content">
+        <span class="container content shadow-md m-5">
           <%= message.content %>
         </span>
       </div>
       <% end %>
   </div>
 
-  <div id="chat-input">
-    <form phx-submit="send_message">
-      <input id="message-input" style="width: 600px;" type="text" name="message" placeholder="Enter your message..."
-        value={@input_text}>
-      <.button type="submit">Send</.button>
 
+  <footer class="fixed bottom-0 w-full h-14 bg-gradient-to-r from-violet-500 to-fuchsia-500 pb-2 px-5 pt-2">
+    <form phx-submit="send_message">
+      <input id="message-input" autocomplete="false" type="textarea" multiple="true" name="content" size="100" ,
+        placeholder=" Enter your message..." value={@input_text}>
+      <.button phx-disable-with="Waiting" type="submit">Send</.button>
     </form>
-  </div>
+  </footer>
 </div>

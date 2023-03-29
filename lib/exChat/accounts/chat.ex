@@ -3,15 +3,15 @@ defmodule ExChat.Accounts.Chat do
   import Ecto.Changeset
 
   schema "chat" do
-    field :name, :string
-
+    field :user_id, :integer
+    field :topic, :string
     timestamps()
   end
 
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:name])
-    |> validate_required([:name])
+    |> cast(attrs, [:user_id, :topic])
+    |> validate_required([:user_id, :topic])
   end
 end
