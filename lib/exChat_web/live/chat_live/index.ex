@@ -1,10 +1,14 @@
 defmodule ExChatWeb.ChatLive.Index do
   use ExChatWeb, :live_view
 
+  alias ExChat.OpenAi
   alias ExChat.Accounts
   alias ExChat.Accounts.Chat
   alias ExChat.Accounts.Message
   use Common
+
+  @status_ready 0
+  @status_waiting 1
 
   @impl true
   def mount(_params, _session, socket) do
@@ -16,9 +20,10 @@ defmodule ExChatWeb.ChatLive.Index do
         topics: [],
         input_text: "",
         current_topic: "",
-        cur_msg_index: 0
+        cur_msg_index: 0,
+        messages: [],
+        status: @status_ready
       )
-      |> stream(:messages, [], dom_id: &"message-#{&1.index}")
 
     {:ok, socket}
   end
@@ -47,29 +52,70 @@ defmodule ExChatWeb.ChatLive.Index do
   end
 
   @impl true
-  def handle_info({ExChatWeb.ChatLive.FormComponent, {:saved, chat}}, socket) do
-    {:noreply, stream_insert(socket, :chat_collection, chat)}
+  def handle_info({:chat_message, content}, socket) do
+    role = "system"
+    index = socket.assigns.cur_msg_index + 1
+    message = ~M{%Message content,role,index}
+    messages = [message | socket.assigns.messages]
+
+    socket =
+      socket
+      |> assign(:messages, messages)
+      |> assign(:cur_msg_index, index)
+      |> assign(:status, @status_ready)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(:get_response, socket) do
+    IO.inspect(socket.assigns.messages, label: "messages")
+
+    messages =
+      for ~M{role,content} <- socket.assigns.messages do
+        ~M{role,content}
+      end
+
+    with {:ok, ~m{choices}} <- OpenAi.Worker.do_request(messages),
+         [~m{message} | _] <- choices,
+         ~m{content,role} <- message do
+      index = socket.assigns.cur_msg_index + 1
+      message = ~M{%Message content,role,index}
+      messages = [message | socket.assigns.messages]
+
+      socket =
+        socket
+        |> assign(:messages, messages)
+        |> assign(:cur_msg_index, index)
+        |> assign(:status, @status_ready)
+
+      {:noreply, socket}
+    else
+      {:error, error} ->
+        IO.inspect(error)
+
+        socket =
+          socket
+          |> assign(:status, @status_ready)
+
+        {:noreply, socket}
+    end
   end
 
   @impl true
-  def handle_event("delete", %{"id" => id}, socket) do
-    chat = Accounts.get_chat!(id)
-    {:ok, _} = Accounts.delete_chat(chat)
-
-    {:noreply, stream_delete(socket, :chat_collection, chat)}
-  end
-
-  def handle_event("send_message", ~m{content}, socket) do
+  def handle_event("user_message", ~m{content}, socket) do
     with content when content != "" <- String.trim(content) do
       role = "user"
       index = socket.assigns.cur_msg_index + 1
       message = ~M{%Message content,role,index}
-      IO.inspect(message)
+      messages = [message | socket.assigns.messages]
 
       socket =
-        stream_insert(socket, :messages, message)
+        socket
+        |> assign(:messages, messages)
         |> assign(:cur_msg_index, index)
+        |> assign(:status, @status_waiting)
 
+      send(self(), :get_response)
       {:noreply, socket}
     else
       _ ->

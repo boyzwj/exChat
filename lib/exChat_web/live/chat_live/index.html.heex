@@ -13,9 +13,9 @@
     </select>
   </div>
 
-  <div id="chat-messages" phx-update="stream" class="overscroll-auto hover:overscroll-contain  w-full">
-    <%= for {dom_id,message} <- @streams.messages do %>
-      <div class="message flex items-center" id={dom_id}>
+  <div id="chat-messages" phx-update="replace" class="overscroll-auto hover:overscroll-contain  w-full">
+    <%= for message <- @messages |> Enum.reverse() do %>
+      <div class="message flex items-center">
         <span class="role">
           <%= message.role %>:
         </span>
@@ -26,12 +26,22 @@
       <% end %>
   </div>
 
+  <%= if @status==1 do%>
 
-  <footer class="fixed bottom-0 w-full h-14 bg-gradient-to-r from-violet-500 to-fuchsia-500 pb-2 px-5 pt-2">
-    <form phx-submit="send_message">
-      <input id="message-input" autocomplete="false" type="textarea" multiple="true" name="content" size="100" ,
-        placeholder=" Enter your message..." value={@input_text}>
-      <.button phx-disable-with="Waiting" type="submit">Send</.button>
-    </form>
-  </footer>
+    <div
+      class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"
+      role="status">
+      <span
+        class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">Loading...</span>
+    </div>
+    <% end %>
+
+
+      <footer class="fixed bottom-0 w-full h-16 bg-gradient-to-r from-violet-500 to-fuchsia-500 pb-2 px-5 pt-2">
+        <form phx-submit="user_message">
+          <input id="message-input" autocomplete="false" type="textarea" multiple="true" name="content" size="100" ,
+            placeholder=" Enter your message..." value={@input_text}>
+          <.button type="submit">Send</.button>
+        </form>
+      </footer>
 </div>
