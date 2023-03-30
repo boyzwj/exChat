@@ -1,5 +1,6 @@
 defmodule ExChatWeb.ChatLive.Index do
   use ExChatWeb, :live_view
+  import Phoenix.LiveView
 
   alias ExChat.OpenAi
   alias ExChat.Accounts
@@ -114,8 +115,9 @@ defmodule ExChatWeb.ChatLive.Index do
         |> assign(:messages, messages)
         |> assign(:cur_msg_index, index)
         |> assign(:status, @status_waiting)
+        |> push_event("scroll_to_bottom", %{})
 
-      send(self(), :get_response)
+      # send(self(), :get_response)
       {:noreply, socket}
     else
       _ ->

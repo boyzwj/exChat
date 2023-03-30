@@ -3,3 +3,12 @@
 @import "tailwindcss/utilities";
 
 /* This file is for your main application CSS */
+body {
+    background-color: #fff;
+    /* 默认背景颜色 */
+}
+
+.dark\:bg-gray-900 {
+    background-color: #111827;
+    /* 黑夜模式下的背景颜色 */
+}
