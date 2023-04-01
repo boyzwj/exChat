@@ -56,7 +56,8 @@ defmodule ExChat.MixProject do
       {:uuid, "~> 1.1"},
       {:memoize, "~> 1.4"},
       {:shorter_maps, git: "https://github.com/boyzwj/shorter_maps.git", tag: "master"},
-      {:logger_file_backend, "~> 0.0.13"}
+      {:logger_file_backend, "~> 0.0.13"},
+      {:earmark, "~>1.4"}
     ]
   end
 

@@ -362,8 +362,12 @@ defmodule ExChat.Accounts do
       [%Chat{}, ...]
 
   """
-  def list_chat do
-    Repo.all(Chat)
+  def list_chat(user_id) do
+    from(c in Chat,
+      where: c.user_id == ^user_id,
+      order_by: [desc: c.inserted_at]
+    )
+    |> Repo.all()
   end
 
   @doc """

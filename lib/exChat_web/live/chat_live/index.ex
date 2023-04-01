@@ -13,7 +13,9 @@ defmodule ExChatWeb.ChatLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    IO.inspect(socket.assigns.current_user, label: "user")
+    Logger.debug("mounting chat live view #{inspect(socket.assigns.current_user)}",
+      tag: "chat_live_view"
+    )
 
     socket =
       socket
@@ -69,8 +71,6 @@ defmodule ExChatWeb.ChatLive.Index do
   end
 
   def handle_info(:get_response, socket) do
-    IO.inspect(socket.assigns.messages, label: "messages")
-
     messages =
       for ~M{role,content} <- socket.assigns.messages do
         ~M{role,content}
@@ -92,11 +92,12 @@ defmodule ExChatWeb.ChatLive.Index do
       {:noreply, socket}
     else
       {:error, error} ->
-        IO.inspect(error)
+        Logger.error("error getting response: #{inspect(error)}")
 
         socket =
           socket
           |> assign(:status, @status_ready)
+          |> put_flash(:error, error)
 
         {:noreply, socket}
     end
@@ -117,11 +118,17 @@ defmodule ExChatWeb.ChatLive.Index do
         |> assign(:status, @status_waiting)
         |> push_event("scroll_to_bottom", %{})
 
-      # send(self(), :get_response)
+      send(self(), :get_response)
       {:noreply, socket}
     else
       _ ->
         {:noreply, socket}
     end
   end
+
+  # defp assign_messages(socket, messages) do
+  #   socket
+  #   |> assign(:messages, messages)
+  #   |> assign(:cur_msg_index, Enum.count(messages))
+  # end
 end

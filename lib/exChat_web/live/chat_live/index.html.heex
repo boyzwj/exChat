@@ -21,9 +21,10 @@
           </p>
         </div>
         <div class="flex-1 ml-2">
-          <div class="bg-slate-300 p-2 rounded-lg shadow-md inline-block">
+          <div class="bg-slate-100 p-2 rounded-lg shadow-md inline-block">
             <p>
-              <%= message.content %>
+              <.markdown text={message.content} />
+              <!--    <%= message.content %> -->
             </p>
           </div>
         </div>

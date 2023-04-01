@@ -42,8 +42,9 @@ defmodule ExChat.OpenAi.Worker do
            |> Finch.request(ExChat.Finch, receive_timeout: 60_000) do
       {:ok, Jason.decode!(body)}
     else
-      {:ok, %Finch.Response{status: status, body: body}} ->
-        {:error, "OpenAI API error: #{status} - #{body}"}
+      {:ok, %Finch.Response{status: 401, body: body}} ->
+        ~m{error} = Jason.decode!(body)
+        {:error, error["message"]}
 
       {:error, error} ->
         {:error, error}

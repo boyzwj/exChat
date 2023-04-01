@@ -5,13 +5,14 @@ defmodule ExChat.Accounts.Chat do
   schema "chat" do
     field :user_id, :integer
     field :topic, :string
+    field :messages, EctoMessages
     timestamps()
   end
 
   @doc false
   def changeset(chat, attrs) do
     chat
-    |> cast(attrs, [:user_id, :topic])
-    |> validate_required([:user_id, :topic])
+    |> cast(attrs, [:user_id, :topic, :messages])
+    |> validate_required([:user_id, :topic, :messages])
   end
 end
